@@ -1,8 +1,8 @@
 const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
-const webpack = require('webpack');
+const { ModuleFederationPlugin} = require('webpack').container;
 
-module.exports = {
+module.exports ={
     //Where files should be sent once they are bundled
     output : {
         path: path.join(__dirname, '/dist'),
@@ -10,7 +10,7 @@ module.exports = {
     },
     // webpack 5 comes with devServer which loads in development mode
     devServer:{
-        port: 3000,
+        port: 3001,
         // watchContentBase: true
     },
     // Rules of how webpack will take our files, compile & bundle them for the browser
@@ -33,13 +33,19 @@ module.exports = {
         extensions:[".js",".jsx",".tsx"],
     },     
     plugins: [
-        new webpack.LoaderOptionsPlugin({
-            options:{
-                remotes:{
-                    mfe1:'mfe1@http://localhost:3001/remoteEntry.js'
+        new HTMLWebpackPlugin({template: './src/index.html'}),
+        new ModuleFederationPlugin({
+            name: 'mfe1',
+            filename:'remoteEntry.js',
+            exposes:{
+                './App': './src/App'
+            },
+            shared:{
+                react:{
+                    singleton:true,
+                    eager:true
                 }
             }
-        }),
-        new HTMLWebpackPlugin({template: './src/index.html'}),
-    ],
-}
+        })
+    ]
+};
